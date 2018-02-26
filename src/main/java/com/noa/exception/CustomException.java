@@ -1,5 +1,5 @@
 package com.noa.exception;
-
+@SuppressWarnings("all")
 //自定义的异常类
 public class CustomException extends Exception {
 	// 异常信息
