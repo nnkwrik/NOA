@@ -11,13 +11,6 @@ NOA是一款基于ssm的Web端OA系统.有打卡,统计出勤状况,公告,邮�
 - MySQL
 - Maven
 
-# 项目结构
-![](https://github.com/nnkwrik/NOA/blob/master/screenshot/1.png)
-
-# 界面效果
-[模板来自:17素材](http://www.17sucai.com/pins/27228.html "模板来自:17素材")
-![](https://github.com/nnkwrik/NOA/blob/master/screenshot/2.png)
-
 # 功能简介
 由于是OA系统.大多数功能都依赖于权限管理.
 - **出勤状况表**
@@ -30,3 +23,10 @@ NOA是一款基于ssm的Web端OA系统.有打卡,统计出勤状况,公告,邮�
 有上传图片,按分类查看已发邮件,已读邮件,未读邮件功能.
 - **查找员工**
 能根据关键字,在线状态,部门查找
+
+# 项目结构
+![](https://github.com/nnkwrik/NOA/blob/master/screenshot/1.png)
+
+# 界面效果
+[模板来自:17素材](http://www.17sucai.com/pins/27228.html "模板来自:17素材")
+![](https://github.com/nnkwrik/NOA/blob/master/screenshot/2.png)
