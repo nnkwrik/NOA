@@ -1,0 +1,12 @@
+com\noa\po\MailCustom.class
+com\noa\mapper\EmployeeMapper.class
+com\noa\po\Employee.class
+com\noa\po\EmployeeCustom.class
+com\noa\po\Attendance.class
+com\noa\po\Mail.class
+com\noa\po\Announcement.class
+com\noa\mapper\MailMapper.class
+com\noa\po\AnnouncementCustom.class
+com\noa\mapper\AnnouncementMapper.class
+com\noa\po\Department.class
+com\noa\po\Mission.class

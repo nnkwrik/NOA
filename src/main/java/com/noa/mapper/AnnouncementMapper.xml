@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须和mapper.java同名 -->
+<mapper namespace="com.noa.mapper.AnnouncementMapper">
+
+	<sql id="basic_Info">
+		SELECT
+			announcement.id,
+			announcement.auther_id,
+			announcement.title,
+			announcement.text,
+			announcement.pic,
+			announcement.time,
+			announcement.target_id,
+			(SELECT department_name FROM sys_department WHERE department_id = target_id) target_name,
+			employee.id emp_id,
+			employee.`name`,
+			employee.pic emp_pic,
+			department_name,
+			position_name,
+			sys_position.position_id
+		FROM
+			announcement,
+			employee,
+			sys_department,
+			sys_position,
+			sys_employee_position
+		WHERE
+			employee.id = auther_id
+		AND sys_department.department_id = employee.department_id
+		AND sys_department.department_id = employee.department_id
+		AND sys_employee_position.employee_id = employee.id
+		AND sys_position.position_id = sys_employee_position.position_id
+	</sql>
+		<resultMap type="com.noa.po.AnnouncementCustom" id="detailMap">
+		
+		<id column="id" property="id" />
+		<result column="auther_id" property="autherId"/>
+		<result column="title" property="title"/>
+		<result column="text" property="text"/>
+		<result column="pic" property="pic"/>		
+		<result column="target_id" property="targetId"/>
+		<result column="target_name" property="targetName"/>
+		<result column="time" property="time"/>
+		<association property="auther" javaType="EmployeeCustom">
+			<id column="emp_id" property="id" />
+			<result column="name" property="name"/>
+			<result column="emp_pic" property="pic"/>
+			<result column="department_name" property="departmentName"/>
+			<result column="position_id" property="positionId"/>
+			<result column="position_name" property="positionName"/>
+		</association>
+	</resultMap>
+
+	<!-- 任务列表 -->
+	<select id="showAnnouncementList" parameterType="java.util.List" resultMap="detailMap">
+	<include refid="basic_Info"/>
+		AND	target_id IN 
+		<!-- 传递单个List时 ,参数名为list -->
+		<foreach item="item" collection="list" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+		ORDER BY time desc
+	</select>
+	
+	<!-- 根据部门id筛选查询公告 -->
+	<select id="filterAnnouncement" parameterType="java.lang.Integer" resultMap="detailMap">
+		<include refid="basic_Info"></include>
+		AND target_id = #{department_id}
+		ORDER BY time desc
+	</select>
+	
+	
+	<!-- 根据id查看公告详细 -->
+	<select id="announcementDetail" parameterType="java.lang.Integer" resultType="Announcement">
+		SELECT * FROM announcement WHERE id=#{mnnouncement_id}
+	</select>
+	
+	<!-- 发布公告 -->
+	<insert id="announce" parameterType="Announcement">
+		INSERT INTO announcement (auther_id,title,target_id,time
+			<if test="text!=null and text!=''">,text</if>
+			<if test="pic!=null and pic!=''">,pic</if>
+		)
+		VALUE (#{autherId},#{title},#{targetId},NOW()
+			<if test="text!=null and text!=''">,#{text}</if>
+			<if test="pic!=null and pic!=''">,#{pic}</if>
+		)
+	</insert>
+	
+	<!-- 删除公告,通过shiro标签进行权限管理, 在此就直接根据公告id删除 -->
+	<delete id="deleteAnnouncement" parameterType="java.lang.Integer">
+		DELETE FROM	announcement WHERE id=#{id}
+	</delete>
+	
+	<!-- 修改内容 -->
+	<update id="editAnnouncement" parameterType="Announcement">
+		UPDATE announcement
+		SET 
+			<if test="text!=null and text!=''">text = #{text},</if>
+			<if test="pic!=null and pic!=''">pic = #{pic},</if>
+			title = #{title},target_id = #{targetId},time = NOW() 
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 关键字搜索 -->
+</mapper>

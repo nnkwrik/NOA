@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<!-- bean id和web.xml中的filter名一样 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager"/>
+		<!-- login时的认证提交url -->
+		<property name="loginUrl" value="/login"/>
+		<!-- 默认认证成功时跳回之前视图访问的路径 ,就算设置了successUrl 也只有在session中的url为null时才会访问这个url-->
+		<!-- <property name="successUrl" value="/home"/> -->
+		<!-- 没有权限时跳转的url -->
+		<property name="unauthorizedUrl" value="/refuse"/>
+		<property name="filters">
+			<map>
+				<!-- 将自定义的FormAuthenticationFilter注入
+				希望成功后能跳转到指定的url,所以自定义一个formAuthenticationFilter -->
+				<entry key="authc" value-ref="formAuthenticationFilter"></entry>
+			</map>
+		</property>
+		<!-- 过滤器链,从上向下执行, 把/**放在最下面 -->
+		<property name="filterChainDefinitions">
+			<value>
+				<!-- 对静态资源设置匿名访问 -->
+				 /resource/** = anon
+				 /signup = anon
+				 /signup2 = anon
+				 /formal_signup = anon
+				<!-- 请求该url时,shiro自动清除session -->
+				/logout = logout
+				<!-- 其他所有都需要认证 -->
+				/** = authc
+				<!-- 权限控制由注解进行 -->
+			</value>
+		</property>
+	</bean>
+	
+	<!-- securityManager -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="customRealm"/>
+		<!-- 注入缓存管理器 -->
+		<property name="cacheManager" ref="cacheManager"/>
+		<!-- 注入session管理器 -->
+		<property name="sessionManager" ref="sessionManager"/>
+		<!-- 记住我 -->
+		<!-- <property name="rememberMeManager" ref="rememberMeManager"/> -->
+	</bean>
+	
+	<!-- realm -->
+	<bean id="customRealm" class="com.noa.shiro.CustomRealm">
+		<!-- 将凭证匹配器设置到realm中, realm按照平正匹配器进行散列 -->
+		<property name="credentialsMatcher" ref="credentialsMatcher"/>
+	</bean>
+	
+	<!-- 凭证匹配器 -->
+	<bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+		<property name="hashAlgorithmName" value="md5"/>
+		<property name="hashIterations" value="1"/>
+	</bean>
+	
+	<!-- 缓存管理器 -->
+	<bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:config/shiro/shiro-ehcache.xml"/>
+		
+	</bean>
+	
+	<!-- 会话管理器 -->
+	<bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+		<!-- session失效的时长, 毫秒单位 -->
+		<property name="globalSessionTimeout" value="600000"/>
+		<!-- 删除失效的session -->
+		<property name="deleteInvalidSessions" value="true"/>
+		<!-- 解决Shiro关于JSESSIONID失效报错 -->
+		<property name="sessionIdCookie">
+            <bean class="org.apache.shiro.web.servlet.SimpleCookie">
+                <property name="name" value="JSESSID" />
+            </bean>
+        </property>
+	</bean>
+	
+	  
+	<!-- 自定义的form认证 -->
+	<bean id="formAuthenticationFilter" class="com.noa.shiro.CustomFormAuthenticationFilter"/>
+	
+
+
+
+</beans>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须和mapper.java同名 -->
+<mapper namespace="com.noa.mapper.AttendanceMapper">
+	<!-- 出勤,根据员工id -->
+	<insert id="on" parameterType="java.lang.Integer">
+		INSERT INTO attendance(employee_id,date,on_time) VALUE (#{employee_id},NOW(),NOW())
+	</insert>
+	<!-- 外勤,更新状态,根据员工id -->
+	<!-- 0正常 1加班 2迟到早退  -->
+	<insert id="filedwork" parameterType="java.lang.Integer">
+		INSERT INTO attendance(employee_id,date,state) VALUE (#{employee_id},NOW(),3)
+	</insert>
+	<!-- 退勤,更新offtime和状态,根据员工id-->
+	<update id="off" parameterType="java.lang.Integer">
+		UPDATE attendance SET state = #{state},off_time=NOW() WHERE employee_id=#{employee_id} and date=CURDATE()
+	</update>
+	<!-- 查看今天的出勤时间,根据员工id,退勤更新状态时要用 -->
+	<select id="getOnTime" parameterType="java.lang.Integer" resultType="java.util.Date">
+		SELECT on_time FROM attendance WHERE date=CURDATE() AND employee_id = #{employee_id}
+	</select>
+	
+
+	
+	<!-- 统计本月各个状态的数量,根据员工id和状态号 -->
+<!-- 	<select id="countMonthState" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			attendance
+		WHERE
+			DATE_FORMAT(date, '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')
+		AND state = #{state}
+		AND employee_id = #{employee_id}
+	</select> -->
+	<select id="countMonthState" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		SELECT
+			state
+		FROM
+			attendance
+		WHERE
+			DATE_FORMAT(date, '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')
+		AND employee_id = #{employee_id}
+	</select>
+	
+</mapper>
