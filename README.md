@@ -12,11 +12,11 @@ NOA是一款基于ssm的Web端OA系统.有打卡,统计出勤状况,公告,邮�
 - Maven
 
 # 项目结构
-[稍后上传]
+![image](http://github.com/nnkwrik/NOA/raw/master/screenshot/1.png)
 
 # 界面效果
 [模板来自:17素材](http://www.17sucai.com/pins/27228.html "模板来自:17素材")
-[稍后上传]
+![image](http://github.com/nnkwrik/NOA/raw/master/screenshot/2.png)
 
 # 功能简介
 由于是OA系统.大多数功能都依赖于权限管理.
