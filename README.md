@@ -1,4 +1,4 @@
-# NOA
+# NOA :rocket::rocket:
 NOA是一款基于ssm的Web端OA系统.有打卡,统计出勤状况,公告,邮件,团队任务功能.能根据部门,岗位进行相关的操作.
 通过Shiro进行权限管理,使用多表格(员工表,员工-岗位表,岗位-权限表,权限表)的管理方式.
 # 使用的技术及框架
@@ -12,11 +12,11 @@ NOA是一款基于ssm的Web端OA系统.有打卡,统计出勤状况,公告,邮�
 - Maven
 
 # 项目结构
-![image](http://github.com/nnkwrik/NOA/raw/master/screenshot/1.png)
+![](https://github.com/nnkwrik/NOA/blob/master/screenshot/1.png)
 
 # 界面效果
 [模板来自:17素材](http://www.17sucai.com/pins/27228.html "模板来自:17素材")
-![image](http://github.com/nnkwrik/NOA/raw/master/screenshot/2.png)
+![](https://github.com/nnkwrik/NOA/blob/master/screenshot/2.png)
 
 # 功能简介
 由于是OA系统.大多数功能都依赖于权限管理.
