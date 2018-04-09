@@ -21,7 +21,10 @@ import com.noa.service.SysService;
 
 @Controller
 @RequestMapping("/mail")
+<<<<<<< HEAD
 @SuppressWarnings("all")
+=======
+>>>>>>> aa6a6779d6208500b5349615db2e00aad7cd97b9
 public class MailController {
 
 	@Autowired
@@ -89,8 +92,13 @@ public class MailController {
 		if (mail_pic != null) {
 			mail_pic.getOriginalFilename();
 		} 
+<<<<<<< HEAD
 		
 		if (mail_pic != null && originalFilename != null && originalFilename.trim() != "") {
+=======
+		if (mail_pic != null && originalFilename != null && originalFilename.trim() != "") {
+
+>>>>>>> aa6a6779d6208500b5349615db2e00aad7cd97b9
 			mail.setPic(sysService.uploadPic("mail", mail_pic));
 		}
 

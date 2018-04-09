@@ -21,7 +21,10 @@ import com.noa.service.SysService;
 
 @Controller
 @RequestMapping("/mission")
+<<<<<<< HEAD
 @SuppressWarnings("all")
+=======
+>>>>>>> aa6a6779d6208500b5349615db2e00aad7cd97b9
 public class MissionController {
 
 	@Autowired
