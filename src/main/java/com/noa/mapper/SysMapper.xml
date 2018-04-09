@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须和mapper.java同名 -->
+<mapper namespace="com.noa.mapper.SysMapper">
+
+	<select id="getAllDepartment" resultType="SysDepartment">
+		SELECT * FROM sys_department
+	</select>	
+	
+	<select id="getAllPosition" resultType="SysPosition">
+		SELECT * FROM sys_position
+	</select>	
+	
+	<select id="getPermissionByEmpId" parameterType="Integer"  resultType="java.lang.String">
+		SELECT
+			percode
+		FROM
+			sys_permission
+		WHERE
+			type = 'permission'
+		AND id IN (
+			SELECT
+				permission_id
+			FROM
+				sys_position_permission
+			WHERE
+				posision_id IN (SELECT position_id FROM sys_employee_position WHERE employee_id = #{id}))
+	</select>
+	
+	<select id="getDepByDepIds" parameterType="java.util.List"  resultType="SysDepartment">
+		SELECT * FROM sys_department WHERE department_id IN
+		<!-- 传递单个List时 ,参数名为list -->
+		<foreach item="item" collection="list" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+	</select>
+
+</mapper>

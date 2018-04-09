@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须和mapper.java同名 -->
+<mapper namespace="com.noa.mapper.MissionMapper">
+	<resultMap type="com.noa.po.MissionCustom" id="simpleMap">
+		<id column="id" property="id" />
+		<result column="auther_id" property="autherId"/>
+		<result column="title" property="title"/>
+		<result column="progress" property="progress"/>
+		<result column="target_id" property="targetId"/>
+		<result column="target_name" property="targetName"/>
+		<result column="time" property="time"/>
+		<association property="auther" javaType="EmployeeCustom">
+			<result column="name" property="name"/>
+			<result column="pic" property="pic"/>
+			<result column="department_name" property="departmentName"/>
+			<result column="position_id" property="positionId"/>
+			<result column="position_name" property="positionName"/>
+		</association>
+	</resultMap>
+
+	<sql id="basic_Info">
+	SELECT
+		mission.id,
+		mission.auther_id,
+		mission.title,
+		mission.progress,
+		mission.target_id,
+		(SELECT department_name FROM sys_department WHERE department_id = target_id) target_name,
+		mission.time,
+		employee.`name`,
+		employee.pic,
+		sys_department.department_name,
+		sys_position.position_name,
+		sys_position.position_id
+	FROM
+		mission,
+		employee,
+		sys_department,
+		sys_position,
+		sys_employee_position
+	WHERE
+		employee.id = auther_id
+	AND sys_department.department_id = employee.department_id
+	AND sys_department.department_id = employee.department_id
+	AND sys_employee_position.employee_id = employee.id
+	AND sys_position.position_id = sys_employee_position.position_id
+
+	</sql>
+
+	
+	
+	<!-- 根据部门id筛选任务 -->
+	<select id="filterMission" parameterType="java.lang.Integer" resultMap="simpleMap">
+		<include refid="basic_Info"/>
+		AND target_id = #{department_id}
+		ORDER BY time desc
+	</select>
+	
+	<!-- 任务列表 -->
+	<select id="showMissionList" parameterType="java.util.List" resultMap="simpleMap">
+		<include refid="basic_Info"/>
+		AND mission.target_id IN 
+		<!-- 传递单个List时 ,参数名为list -->
+		<foreach item="item" collection="list" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+		ORDER BY time desc
+	</select>
+	
+	<resultMap type="com.noa.po.MissionCustom" id="detailMap">
+		
+		<id column="id" property="id" />
+		<result column="auther_id" property="autherId"/>
+		<result column="title" property="title"/>
+		<result column="text" property="text"/>
+		<result column="pic" property="pic"/>		
+		<result column="progress" property="progress"/>
+		<result column="target_id" property="targetId"/>
+		<result column="target_name" property="targetName"/>
+		<result column="comment" property="comment"/>
+		<result column="time" property="time"/>
+		<association property="auther" javaType="EmployeeCustom">
+			<id column="emp_id" property="id" />
+			<result column="name" property="name"/>
+			<result column="emp_pic" property="pic"/>
+			<result column="department_name" property="departmentName"/>
+			<result column="position_id" property="positionId"/>
+			<result column="position_name" property="positionName"/>
+		</association>
+	</resultMap>
+	<!-- 根据任务id查看详情 -->
+	<select id="missionDetail" parameterType="java.lang.Integer" resultMap="detailMap">
+		SELECT
+			mission.*, 
+			(SELECT department_name FROM sys_department WHERE department_id = target_id) target_name,
+			employee.id emp_id,
+			employee.`name`,
+			employee.pic emp_pic,
+			sys_department.department_name,
+			sys_position.position_name,
+			sys_position.position_id
+		FROM
+			mission,
+			employee,
+			sys_department,
+			sys_position,
+			sys_employee_position
+		WHERE
+			employee.id = auther_id
+		AND sys_department.department_id = employee.department_id
+		AND sys_department.department_id = employee.department_id
+		AND sys_employee_position.employee_id = employee.id
+		AND sys_position.position_id = sys_employee_position.position_id
+		AND mission.id = #{id}
+	</select>
+	<!-- 发布任务 -->
+	<insert id="postMission" parameterType="Mission">
+		INSERT INTO mission (auther_id,title,target_id,time
+			<if test="text!=null and text!=''">,text</if>
+			<if test="pic!=null and pic!=''">,pic</if>
+			<if test="progress!=null">,progress</if>
+
+		)
+		VALUE (#{autherId},#{title},#{targetId},NOW()
+			<if test="text!=null and text!=''">,#{text}</if>
+			<if test="pic!=null and pic!=''">,#{pic}</if>
+			<if test="progress!=null">,#{progress}</if>
+		)
+	</insert>
+	
+	<!-- 更新进度 -->
+	<update id="updateProgress" parameterType="Integer">
+		UPDATE mission SET progress=#{progress} WHERE id = #{id}
+	</update>
+	<!-- 插入,删除评论 -->
+	<update id="comment" parameterType="Mission">
+		UPDATE mission SET comment=#{comment} WHERE id = #{id}
+	</update>
+	
+	<!-- 根据任务id删除任务 -->
+	<delete id="deleteMission" parameterType="java.lang.Integer">
+		DELETE FROM mission WHERE id = #{id}
+	</delete>
+	
+	<!-- 修改内容 -->
+	<update id="editMission" parameterType="Mission">
+		UPDATE mission 
+		<set>
+			<if test="text!=null and text!=''">text = #{text},</if>
+			<if test="pic!=null and pic!=''">pic = #{pic},</if>
+			title = #{title},
+			target_id = #{targetId},
+			progress = #{progress},
+			time = NOW()
+		</set>
+		 WHERE id = #{id}
+	</update>
+</mapper>

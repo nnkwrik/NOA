@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须和mapper.java同名 -->
+<mapper namespace="com.noa.mapper.MailMapper">
+
+	<resultMap type="com.noa.po.MailCustom" id="simpleMap">
+		<id column="id" property="id"/>
+		<result column="sendtime" property="sendtime"/>
+		<result column="title" property="title"/>
+		<result column="read" property="read"/>
+		<association property="otherside" javaType="EmployeeCustom">
+			<id column="emp_id" property="id"/>
+			<result column="name" property="name"/>
+			<result column="pic" property="pic"/>
+			<result column="working_state" property="workingState"/>
+			<result column="department_name" property="departmentName"/>
+			<result column="position_name" property="positionName"/>
+		</association>
+	</resultMap>
+
+
+
+	<sql id="basic_info">
+		SELECT
+			mail.id,
+			mail.sendtime,
+			mail.title,
+			mail.`read`,
+			employee.id emp_id,
+			employee.`name`,
+			employee.pic,
+			employee.working_state,
+			sys_department.department_name,
+			sys_position.position_name
+		FROM
+			mail,
+			employee,
+			sys_department,
+			sys_position,
+			sys_employee_position
+		WHERE
+			employee.department_id = sys_department.department_id
+		AND sys_department.department_id = employee.department_id
+		AND sys_employee_position.employee_id = employee.id
+		AND sys_position.position_id = sys_employee_position.position_id
+	</sql>
+	
+	
+	
+	<sql id="toME">
+		<include refid="basic_info"/>
+		AND reciever_id = #{id}
+		AND server_id = employee.id
+	</sql>
+	
+	<sql id="sendByMe">
+		<include refid="basic_info"/>
+		AND server_id = #{id}
+		AND reciever_id = employee.id
+	</sql>
+	
+	
+	<!-- 查询发送给自己的所有邮件 -->
+		<select id="findMailToMe" parameterType="java.lang.Integer" resultMap="simpleMap">
+		<include refid="toME" />
+		ORDER BY sendtime desc
+	</select>
+
+	<!-- 查询发送给自己的未读邮件(id,发件人,题目等简单信息) -->
+	<select id="findUnreadMailToMe" parameterType="java.lang.Integer" resultMap="simpleMap">
+		<include refid="toME" />
+		AND `read` = 0
+		ORDER BY sendtime desc
+	</select>
+	
+	<!-- 查询发送给自己的已读邮件(id,发件人,题目等简单信息) -->
+	<select id="findReadMailToMe" parameterType="java.lang.Integer" resultMap="simpleMap">
+		<include refid="toME" />
+		AND `read` = 1
+		ORDER BY sendtime desc
+	</select>
+	<!-- 查询自己发送的邮件 -->
+	<select id="findMailSendByMe" parameterType="java.lang.Integer" resultMap="simpleMap">
+		<include refid="sendByMe"/>
+		ORDER BY sendtime desc
+	</select>
+	
+	<resultMap type="com.noa.po.MailCustom" id="detailMap">
+		<id column="id" property="id"/>
+		<result column="sendtime" property="sendtime"/>
+		<result column="title" property="title"/>
+		<result column="read" property="read"/>
+		<result column="text" property="text"/>
+		<result column="pic" property="pic"/>
+		<association property="otherside" javaType="EmployeeCustom">
+			<id column="emp_id" property="id"/>
+			<result column="emp_name" property="name"/>
+			<result column="emp_pic" property="pic"/>
+			<result column="working_state" property="workingState"/>
+			<result column="department_id" property="departmentId"/>
+			<result column="department_name" property="departmentName"/>
+			<result column="position_id" property="positionId"/>
+			<result column="position_name" property="positionName"/>
+		</association>
+	</resultMap>
+	<!-- 根据邮件id查看邮件详细内容 -->
+	<select id="showMailDetail" parameterType="java.lang.Integer" resultMap="detailMap">
+		SELECT
+			mail.id,
+			mail.sendtime,
+			mail.title,
+			mail.`read`,
+			mail.text,
+			mail.pic,
+			employee.id emp_id,
+			employee.`name` emp_name,
+			employee.pic emp_pic,
+			employee.working_state,
+			sys_department.department_id,
+			sys_department.department_name,
+			sys_position.position_id,
+			sys_position.position_name
+		FROM
+			mail,
+			employee,
+			sys_department,
+			sys_position,
+			sys_employee_position
+		WHERE
+			employee.department_id = sys_department.department_id
+		AND sys_department.department_id = employee.department_id
+		AND sys_employee_position.employee_id = employee.id
+		AND sys_position.position_id = sys_employee_position.position_id
+		AND mail.id = #{mail_id}
+		AND employee.id = #{otherside_id}
+	</select>
+	
+	
+	<!-- 改为已读 -->
+	<update id="updateRead" parameterType="java.lang.Integer">
+		UPDATE mail SET `read`=1 WHERE id=#{id}
+	</update>
+	
+	<!-- 发送邮件 -->
+	<insert id="SendMail" parameterType="Mail">
+		INSERT INTO mail(server_id,reciever_id,sendtime
+			<if test="title!=null and title!=''">,title</if>
+			<if test="text!=null and text!=''">,text</if>
+			<if test="pic!=null and pic!=''">,pic</if>
+			) 
+		VALUE(#{serverId},#{recieverId},NOW()
+			<if test="title!=null and title!=''">,#{title}</if>
+			<if test="text!=null and text!=''">,#{text}</if>
+			<if test="pic!=null and pic!=''">,#{pic}</if>
+			)
+	</insert>
+	
+	
+	<!-- 单方从邮件列表中删除邮件 -->
+
+</mapper>

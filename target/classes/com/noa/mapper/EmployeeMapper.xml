@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须和mapper.java同名 -->
+<mapper namespace="com.noa.mapper.EmployeeMapper">
+	
+		<sql id="basic_Info">
+			SELECT
+				employee.id,
+				employee.`name`,
+				employee.sex,
+				employee.pic,
+				employee.department_id,
+				employee.working_state,
+				employee.locked,
+				sys_department.department_name,
+				sys_position.position_id,
+				sys_position.position_name
+			FROM
+				employee,
+				sys_department,
+				sys_position,
+				sys_employee_position
+			WHERE
+				
+				sys_department.department_id = employee.department_id
+			AND sys_employee_position.employee_id = employee.id
+			AND sys_position.position_id = sys_employee_position.position_id
+		</sql>
+
+
+		<!-- 员工查询 -->
+		<select id="findEmployee" parameterType="Employee" resultType="EmployeeCustom">
+			<include refid="basic_Info"/>
+<!--  			<if test="id!=null">
+				AND employee.id = #{id}
+			</if> -->
+<!-- 			<if test="locked!=null">
+			</if> -->
+			<if test="departmentId!=null">
+				AND employee.department_id = #{departmentId}
+			</if>
+			<if test="name!=null and name!=''">
+				AND employee.name LIKE '%${name}%'
+			</if>
+			<if test="workingState != null">
+				AND employee.working_state = #{workingState}
+			</if>
+	</select>
+	
+	<!-- 根据id查找员工 -->
+	<select id="findEmployeeById" parameterType="Integer" resultType="EmployeeCustom">
+		<include refid="basic_Info"/>
+		AND employee.id = #{id}
+	</select>
+	
+	
+	<!-- 更新状态 -->
+	<update id="changeWorkingState" parameterType="EmployeeCustom">
+		UPDATE employee SET working_state = #{workingState} WHERE id = #{id}
+	</update>
+	
+	
+	
+	<!-- 账户是否存在 -->
+	<select id="existedUsername" parameterType="Employee" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM employee WHERE username=#{username}
+	</select>
+	
+	<!-- 注册 -->
+	<insert id="register" parameterType="Employee">
+		<!-- 获取刚才注册时的主键 -->
+	 	<!--LAST_INSERT_ID() :得到刚insert进去的记录的主键值, 只适用于==自增主键==
+	 		keyProperty : 将查询到的主键值设置到pojo的哪个属性
+	 		order : 相对于insert语句的执行时间
+	 		resultType : 该函数执行后返回的类型
+	 	 -->
+	 	 <selectKey keyProperty="id" order="AFTER" resultType="int">
+	 	 	SELECT LAST_INSERT_ID()
+	 	 </selectKey>
+	 	 
+		INSERT INTO employee (
+			`name`,sex,pic,department_id,username,`password`,salt
+		)
+		VALUES (
+			#{name},#{sex},#{pic},#{departmentId},#{username},#{password},#{salt}
+		)
+	</insert>
+	
+	<!-- 注册角色信息 -->
+	<insert id="registerPosition" parameterType="Employee">
+
+		INSERT INTO sys_employee_position (position_id, employee_id) VALUES (#{positionId}, #{id})
+	</insert>
+	
+	<!-- 登录 -->
+	<select id="login" parameterType="Employee" resultType="EmployeeCustom">
+		<include refid="basic_Info"/>
+		AND employee.id = 
+		(SELECT id FROM employee WHERE username = #{username} AND `password` = #{password})
+	</select>
+	
+	<!-- 根据username查找,用户登录信息 -->
+	<select id="findAccountByUsername" parameterType="java.lang.String" resultType="Employee">
+		SELECT id,username,`password`,salt FROM employee WHERE username = #{username}
+	</select>
+	
+	<!-- 更新员工信息 -->
+
+	<!-- 删除员工 -->
+
+</mapper>
