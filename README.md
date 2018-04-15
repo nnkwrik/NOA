@@ -32,4 +32,3 @@ NOA是一款基于ssm的Web端OA系统.有打卡,统计出勤状况,公告,邮�
 
 ![](https://github.com/nnkwrik/NOA/blob/master/screenshot/2.png)
 
-![](https://github.com/nnkwrik/NOA/blob/master/screenshot/2.png)
